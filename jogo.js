@@ -21,7 +21,7 @@ let keys = {};
 
 function drawBackground() {
   const fundo = new Image();
-  fundo.src = 'fundo.jpg';
+  fundo.src = './imagens/fundo.jpg';
   fundo.onload = () => {
     ctx.drawImage(fundo, 0, 0, canvas.width, canvas.height);
   };
