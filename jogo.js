@@ -66,9 +66,31 @@ const personagem = {
   largura : 944,
   altura : 1552,
   x : 10,
-  y : 50,
+  y : 260,
   larguraCanvas : 60,
   alturaCanvas : 90,
+  velocidade: 5,
+
+
+  atualiza() {
+
+  },
+
+  mover() {
+    if (direitaPressionada) {
+      this.x += this.velocidade;
+      if (this.x + this.larguraCanvas > canvas.width) {
+        this.x = canvas.width - this.larguraCanvas;
+      }
+    }
+    if (esquerdaPressionada) {
+      this.x -= this.velocidade;
+      if (this.x < 0) {
+        this.x = 0;
+      }
+    }
+  },
+
   desenha(){
     ctx.drawImage(
       spritePersonagem,
@@ -80,17 +102,63 @@ const personagem = {
   }
 };
 
+
+
+// Controle do movimento do personagem
+let esquerdaPressionada = false;
+let direitaPressionada = false;
+
+
+// andar pra frente ou para trás com as setas ou com d/a
+document.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowRight" || e.key === "d") {
+    direitaPressionada = true;
+  } else if (e.key === "ArrowLeft" || e.key === "a") {
+    esquerdaPressionada = true;
+  }
+});
+
+document.addEventListener("keyup", function (e) {
+  if (e.key === "ArrowRight" || e.key === "d") {
+    direitaPressionada = false;
+  } else if (e.key === "ArrowLeft" || e.key === "a") {
+    esquerdaPressionada = false;
+  }
+});
+
+
+// telas
+let telaAtiva = {};
+function mudaDeTela(novaTela){
+  telaAtiva =  novaTela;
+}
+
+const telas = {
+
+};
+
+telas.jogo = {
+    desenha(){
+      planoDeFundo.desenha();
+      chao.desenha();
+      personagem.desenha();
+    },
+    atualiza(){
+      personagem.mover();
+      personagem.atualiza();
+
+    },
+};
+
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas a cada loop
-  planoDeFundo.desenha();         // faz a funçao de desenhar o fundo
-  chao.desenha();               // faz a funçao de desenhar o chão
-  personagem.desenha();       // faz a funçao de desenhar o personagem
 
+  telaAtiva.desenha();
+  telaAtiva.atualiza();
 
-  
   requestAnimationFrame(loop);
 }
 
-spritePersonagem.onload = () => {
-  loop(); // Só inicia o loop quando a imagem estiver carregada
-};
+mudaDeTela(telas.jogo);
+loop(); 
+
