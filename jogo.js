@@ -1,84 +1,96 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const startButton = document.getElementById('startButton');
+const canvas = document.getElementById("jogo-canvas");
+const ctx = canvas.getContext("2d");
 
-// Personagem
-const player = {
-  x: 50,
-  y: 300,
-  width: 40,
-  height: 60,
-  color: 'red',
-  dx: 0,
-  dy: 0,
-  gravity: 0.8,
-  jumpForce: -12,
-  grounded: false
+const spritePersonagem = new Image();
+spritePersonagem.src = 'imagens/personagem.png';
+
+const spritechao = new Image();
+spritechao.src = 'imagens/chaos.png';
+
+const spritefundo = new Image();
+spritefundo.src = 'imagens/fundo2.png';
+
+
+
+// plano de fundo
+const planoDeFundo = {
+  spritex : 6,
+  spritey : 11,
+  largura : 5230,
+  altura : 3471,
+  x : 0,
+  y : canvas.height - 400,
+  larguraCanvas : 800,
+  alturaCanvas : 400,
+  desenha(){
+    ctx.drawImage(
+      spritefundo,
+      planoDeFundo.spritex , planoDeFundo.spritey,
+      planoDeFundo.largura, planoDeFundo.altura,
+      planoDeFundo.x, planoDeFundo.y,
+      planoDeFundo.larguraCanvas, planoDeFundo.alturaCanvas
+    );
+  }
 };
 
-let isPlaying = false;
-let keys = {};
 
-function drawBackground() {
-  const fundo = new Image();
-  fundo.src = './imagens/fundo.jpg';
-  fundo.onload = () => {
-    ctx.drawImage(fundo, 0, 0, canvas.width, canvas.height);
-  };
-}
+// Chao
+const chao = {
+  spritex : 267,   //posição x no sprite  (arquivo png)
+  spritey : 595,    //posição y no sprite  (arquivo png)
+  largura : 3510,     //largura da imagem no sprite (arquivo png)
+  altura : 407,      //altura da imagem no sprite (arquivo png)
+  x : 0,                  // posição x no canva
+  y : canvas.height - 80,   // posição y no canva - a altura da imagem no canva
+  larguraCanvas : 800,         // largura da imagem no canva
+  alturaCanvas : 80,        // altura da imagem no canva
 
-function drawPlayer() {
-  ctx.fillStyle = player.color;
-  ctx.fillRect(player.x, player.y, player.width, player.height);
-}
 
-function update() {
-  // física básica
-  player.dy += player.gravity;
-  player.y += player.dy;
+  desenha(){                // função que desenha a imagem no canva
+    ctx.drawImage(
+      spritechao,
+      chao.spritex , chao.spritey,
+      chao.largura, chao.altura,
+      chao.x, chao.y,
+      chao.larguraCanvas, chao.alturaCanvas
+    );
 
-  // controle de movimento
-  if (keys['ArrowLeft']) player.x -= 5;
-  if (keys['ArrowRight']) player.x += 5;
-
-  // chão
-  if (player.y + player.height > canvas.height) {
-    player.y = canvas.height - player.height;
-    player.dy = 0;
-    player.grounded = true;
   }
-
-  // Limites laterais
-  if (player.x < 0) player.x = 0;
-  if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 }
+
+
+// Personagem
+const personagem = {
+  spritex : 0,
+  spritey : 0,
+  largura : 944,
+  altura : 1552,
+  x : 10,
+  y : 50,
+  larguraCanvas : 60,
+  alturaCanvas : 90,
+  desenha(){
+    ctx.drawImage(
+      spritePersonagem,
+      personagem.spritex , personagem.spritey,
+      personagem.largura, personagem.altura,
+      personagem.x, personagem.y,
+      personagem.larguraCanvas, personagem.alturaCanvas
+    );
+  }
+};
 
 function loop() {
-  if (!isPlaying) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas a cada loop
+  planoDeFundo.desenha();         // faz a funçao de desenhar o fundo
+  chao.desenha();               // faz a funçao de desenhar o chão
+  personagem.desenha();       // faz a funçao de desenhar o personagem
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBackground();
-  update();
-  drawPlayer();
 
+  
   requestAnimationFrame(loop);
 }
 
-function startGame() {
-  isPlaying = true;
-  loop();
-}
-
-document.addEventListener('keydown', (e) => {
-  keys[e.key] = true;
-  if (e.key === ' ' && player.grounded) {
-    player.dy = player.jumpForce;
-    player.grounded = false;
-  }
-});
-
-document.addEventListener('keyup', (e) => {
-  keys[e.key] = false;
-});
-
-startButton.addEventListener('click', startGame);
+spritePersonagem.onload = () => {
+  loop(); // Só inicia o loop quando a imagem estiver carregada
+};
