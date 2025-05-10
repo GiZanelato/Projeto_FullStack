@@ -1,7 +1,7 @@
 body{
   width: 100%;   /* para ocupar toda a pagina, 100% da pagina*/
   height: 100vh;    /* para ocupar toda a pagina, 100% do view height*/
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url('./imagens/fundo.jpg');   /* Aplica um gradiente que deixa a imagem mais escura e translucida --> chatGPT*/
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url('./imagens/fundo.png');   /* Aplica um gradiente que deixa a imagem mais escura e translucida --> chatGPT*/
   background-size: cover;     /* Faz a imagem cobrir todo o fundo --> ChatGPT*/
   background-position: center;  /* centraliza a imagem  --> ChatGPT*/
   z-index: -1;

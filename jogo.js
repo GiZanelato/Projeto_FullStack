@@ -5,7 +5,7 @@ const spritePersonagem = new Image();
 spritePersonagem.src = 'imagens/personagem.png';
 
 const spritechao = new Image();
-spritechao.src = 'imagens/chaos.png';
+spritechao.src = 'imagens/sprite.png';
 
 const spritefundo = new Image();
 spritefundo.src = 'imagens/fundo2.png';
@@ -36,14 +36,14 @@ const planoDeFundo = {
 
 // Chao
 const chao = {
-  spritex : 267,   //posição x no sprite  (arquivo png)
-  spritey : 595,    //posição y no sprite  (arquivo png)
-  largura : 3510,     //largura da imagem no sprite (arquivo png)
-  altura : 407,      //altura da imagem no sprite (arquivo png)
+  spritex : 1896,   //posição x no sprite  (arquivo png)
+  spritey : 424,    //posição y no sprite  (arquivo png)
+  largura : 3760,     //largura da imagem no sprite (arquivo png)
+  altura : 968,      //altura da imagem no sprite (arquivo png)
   x : 0,                  // posição x no canva
-  y : canvas.height - 80,   // posição y no canva - a altura da imagem no canva
+  y : canvas.height - 65,   // posição y no canva - a altura da imagem no canva
   larguraCanvas : 800,         // largura da imagem no canva
-  alturaCanvas : 80,        // altura da imagem no canva
+  alturaCanvas : 65,        // altura da imagem no canva
 
 
   desenha(){                // função que desenha a imagem no canva
@@ -66,9 +66,9 @@ const personagem = {
   largura : 944,
   altura : 1552,
   x : 10,
-  y : 260,
+  y : 245,
   larguraCanvas : 60,
-  alturaCanvas : 90,
+  alturaCanvas : 95,
   velocidade: 5,
 
 
