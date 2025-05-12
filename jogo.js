@@ -10,8 +10,6 @@ spritechao.src = 'imagens/sprite.png';
 const spritefundo = new Image();
 spritefundo.src = 'imagens/fundo2.png';
 
-
-
 // plano de fundo
 const planoDeFundo = {
   spritex : 6,
@@ -33,20 +31,18 @@ const planoDeFundo = {
   }
 };
 
-
 // Chao
 const chao = {
-  spritex : 1896,   //posição x no sprite  (arquivo png)
-  spritey : 424,    //posição y no sprite  (arquivo png)
-  largura : 3760,     //largura da imagem no sprite (arquivo png)
-  altura : 968,      //altura da imagem no sprite (arquivo png)
-  x : 0,                  // posição x no canva
-  y : canvas.height - 65,   // posição y no canva - a altura da imagem no canva
+  spritex : 1896,      //posição x no sprite  (arquivo png)
+  spritey : 424,       //posição y no sprite  (arquivo png)
+  largura : 3760,      //largura da imagem no sprite (arquivo png)
+  altura : 968,         //altura da imagem no sprite (arquivo png)
+  x : 0,                   // posição x no canva
+  y : canvas.height - 65,     // posição y no canva - a altura da imagem no canva
   larguraCanvas : 800,         // largura da imagem no canva
-  alturaCanvas : 65,        // altura da imagem no canva
+  alturaCanvas : 65,             // altura da imagem no canva
 
-
-  desenha(){                // função que desenha a imagem no canva
+  desenha(){                         // função que desenha a imagem no canva
     ctx.drawImage(
       spritechao,
       chao.spritex , chao.spritey,
@@ -54,7 +50,27 @@ const chao = {
       chao.x, chao.y,
       chao.larguraCanvas, chao.alturaCanvas
     );
+  }
+};
 
+// Controle de movimento
+let direitaPressionada = false;
+let esquerdaPressionada = false;
+
+let gravidade = 1;
+let velocidadeY = 0;
+let noChao = false;
+let pulos = 0;
+
+function fazColisao(personagem, chao){
+  const personagemY = personagem.y + personagem.alturaCanvas;
+  const chaoY = chao.y;
+
+  if(personagemY >= chaoY){
+    personagem.y = chao.y - personagem.alturaCanvas;
+    velocidadeY = 0;        // velocidade vertical, para não inteferir na velocidade horizontal que esta sendo usada para fazer o personagem andar
+    noChao = true;
+    pulos = 0;
   }
 }
 
@@ -71,22 +87,28 @@ const personagem = {
   alturaCanvas : 95,
   velocidade: 5,
 
-
   atualiza() {
+  
+    // Aplica gravidade
+    velocidadeY += gravidade;
+    personagem.y += velocidadeY;
+
+     // Verifica colisão com o chão
+    fazColisao(personagem, chao);
 
   },
 
   mover() {
     if (direitaPressionada) {
-      this.x += this.velocidade;
-      if (this.x + this.larguraCanvas > canvas.width) {
-        this.x = canvas.width - this.larguraCanvas;
+      personagem.x += personagem.velocidade;
+      if (personagem.x + personagem.larguraCanvas > canvas.width) {
+        personagem.x = canvas.width - personagem.larguraCanvas;
       }
     }
     if (esquerdaPressionada) {
-      this.x -= this.velocidade;
-      if (this.x < 0) {
-        this.x = 0;
+      personagem.x -= personagem.velocidade;
+      if (personagem.x < 0) {
+        personagem.x = 0;
       }
     }
   },
@@ -102,63 +124,52 @@ const personagem = {
   }
 };
 
+// Teclado
+document.addEventListener('keydown', function(evento) {
+  let tecla = evento.key;
+  
+  if (tecla == 'ArrowRight') direitaPressionada = true;
+  if (tecla == 'ArrowLeft') esquerdaPressionada = true;
 
-
-// Controle do movimento do personagem
-let esquerdaPressionada = false;
-let direitaPressionada = false;
-
-
-// andar pra frente ou para trás com as setas ou com d/a
-document.addEventListener("keydown", function (e) {
-  if (e.key === "ArrowRight" || e.key === "d") {
-    direitaPressionada = true;
-  } else if (e.key === "ArrowLeft" || e.key === "a") {
-    esquerdaPressionada = true;
+  if ((tecla == ' ' || tecla == 'ArrowUp') && pulos < 2) {
+    velocidadeY = -15;
+    pulos++;
+    noChao = false;
   }
 });
 
-document.addEventListener("keyup", function (e) {
-  if (e.key === "ArrowRight" || e.key === "d") {
-    direitaPressionada = false;
-  } else if (e.key === "ArrowLeft" || e.key === "a") {
-    esquerdaPressionada = false;
-  }
+document.addEventListener('keyup', function(evento) {
+  const tecla = evento.key;
+  if (tecla == 'ArrowRight') direitaPressionada = false;
+  if (tecla == 'ArrowLeft') esquerdaPressionada = false;
 });
 
-
-// telas
+// Telas
 let telaAtiva = {};
 function mudaDeTela(novaTela){
   telaAtiva =  novaTela;
 }
 
-const telas = {
-
-};
+const telas = {};
 
 telas.jogo = {
-    desenha(){
-      planoDeFundo.desenha();
-      chao.desenha();
-      personagem.desenha();
-    },
-    atualiza(){
-      personagem.mover();
-      personagem.atualiza();
-
-    },
+  desenha(){
+    planoDeFundo.desenha();
+    chao.desenha();
+    personagem.desenha();
+  },
+  atualiza(){
+    personagem.mover();
+    personagem.atualiza();
+  },
 };
 
 function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas a cada loop
-
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   telaAtiva.desenha();
   telaAtiva.atualiza();
-
   requestAnimationFrame(loop);
 }
 
 mudaDeTela(telas.jogo);
-loop(); 
-
+loop();
