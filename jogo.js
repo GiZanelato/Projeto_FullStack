@@ -1,6 +1,7 @@
 const canvas = document.getElementById("jogo-canvas");
 const ctx = canvas.getContext("2d");
 
+let frames = 0;
 const spritePersonagem = new Image();
 spritePersonagem.src = 'imagens/personagem.png';
 
@@ -9,6 +10,13 @@ spritechao.src = 'imagens/sprite.png';
 
 const spritefundo = new Image();
 spritefundo.src = 'imagens/fundo2.png';
+
+const spritePlanta = new Image();
+spritePlanta.src = 'imagens/planta.png';
+
+const spriteCogumelo = new Image();
+spriteCogumelo.src = 'imagens/cogumelo.png'; 
+
 
 // plano de fundo
 function criaFundo(){
@@ -100,7 +108,7 @@ return chao;
 let direitaPressionada = false;
 let esquerdaPressionada = false;
 
-let gravidade = 1;
+let gravidade = 0.4;
 let velocidadeY = 0;
 let noChao = false;
 let pulos = 0;
@@ -131,15 +139,20 @@ function criapersonagem(){
   velocidade: 5,
 
   atualiza() {
-  
     // Aplica gravidade
     velocidadeY += gravidade;
     personagem.y += velocidadeY;
 
-     // Verifica colisão com o chão
-    fazColisao(personagem, globais.chao);
+    // Limita para que o personagem não ultrapasse o topo do canvas
+    if (personagem.y < 0) {
+      personagem.y = 0;
+      velocidadeY = 0;
+    }
 
+    // Verifica colisão com o chão
+    fazColisao(personagem, globais.chao);
   },
+
 
   mover() {
     if (direitaPressionada) {
@@ -157,6 +170,7 @@ function criapersonagem(){
   },
 
   movimentos: [             // corrida
+    { spritex: 1712, spritey: 0, }, 
     { spritex: 63, spritey: 0, }, 
     { spritex: 928, spritey: 0, }, 
     { spritex: 1712, spritey: 0, }, 
@@ -165,36 +179,189 @@ function criapersonagem(){
     { spritex: 4160, spritey: 0, }, 
   ],
 
+  movimentoPulo:[
+    { spritex: 0, spritey: 3161 },
+    { spritex: 888, spritey: 3161 },
+    { spritex: 1672, spritey: 3161 },
+    { spritex: 2440, spritey: 3057 },
+    { spritex: 3208, spritey: 3161 },
+    { spritex: 4008, spritey: 3161 },
+  ] ,
+
+
   frameAtual: 0,
   atualizaOFrameAtual() {     
     const intervaloDeFrames = 10;
-    const passouOIntervalo = frames % intervaloDeFrames === 0;
+    const passouOIntervalo = frames % intervaloDeFrames == 0;
 
     if(passouOIntervalo) {
       const baseDoIncremento = 1;
-      const incremento = baseDoIncremento + personagem.frameAtual;
-      const baseRepeticao = passouOIntervalo.movimentos.length;
-      personagem.frameAtual = incremento % baseRepeticao
+      const incremento = baseDoIncremento + this.frameAtual;
+      const baseRepeticao = this.movimentos.length;
+      this.frameAtual = incremento % baseRepeticao;
     }
   },
 
   desenha(){
-    personagem.atualizaOFrameAtual();
-    const { spritex, spritey } = personagem.movimentos[personagem.frameAtual];
+    let spritex, spritey;
+
+    if (!noChao) {
+      // Personagem está no ar → usar sprite de pulo
+      this.atualizaOFrameAtual(); // animação do pulo também
+      ({ spritex, spritey } = this.movimentoPulo[this.frameAtual % this.movimentoPulo.length]);
+    } else {
+      // Personagem no chão — animação correndo mesmo parado (removemos a checagem das setas)
+      this.atualizaOFrameAtual();
+      ({ spritex, spritey } = this.movimentos[this.frameAtual]);
+    }
 
     ctx.drawImage(
       spritePersonagem,
       spritex , spritey,
-      personagem.largura, personagem.altura,
-      personagem.x, personagem.y,
-      personagem.larguraCanvas, personagem.alturaCanvas
+      this.largura, this.altura,
+      this.x, this.y,
+      this.larguraCanvas, this.alturaCanvas
     );
   }
-};
+  };
 
- return personagem;
+  return personagem;
 
 }
+
+// plantas
+function criaPlantas() {
+  const plantas = {
+    lista: [],
+    largura: 30,
+    altura: 30,
+    frequencia: 100,
+    velocidade: 2,
+
+    atualiza() {
+      if (frames % plantas.frequencia === 0) {
+        // Decide aleatoriamente se a planta será baixa ou alta
+        const tipo = Math.random() < 0.5 ? 'baixo' : 'alto';
+
+        let posY;
+
+        if (tipo === 'baixo') {
+          // Próximo do chão - planta que o personagem pode pular por cima
+          posY = canvas.height - globais.chao.alturaCanvas - plantas.altura;
+        } else {
+          // Altas - planta que o personagem tem que passar por baixo
+          // Coloca acima do personagem (exemplo: 100 pixels acima dele)
+          posY = globais.personagem.y - plantas.altura - 10;
+          if (posY < 0) posY = 0;  // limite no topo do canvas
+        }
+
+        plantas.lista.push({
+          x: canvas.width,
+          y: posY,
+          tipo: tipo,
+        });
+      }
+
+      // Move as plantas para esquerda e remove as que saíram da tela
+      plantas.lista = plantas.lista.filter(planta => {
+        planta.x -= plantas.velocidade;
+        return planta.x + plantas.largura > 0;
+      });
+    },
+
+    desenha() {
+      plantas.lista.forEach((planta) => {
+        ctx.drawImage(
+          spritePlanta,
+          0, 55,
+          426, 534,
+          planta.x, planta.y,
+          plantas.largura, plantas.altura
+        );
+      });
+    },
+
+    temColisaoCom(personagem) {
+      return plantas.lista.some((planta) => {
+        const colisaoX = personagem.x < planta.x + plantas.largura &&
+                         personagem.x + personagem.larguraCanvas > planta.x;
+
+        if (planta.tipo === 'baixo') {
+          // Colisão normal: se personagem bater de lado ou por baixo, game over
+          const colisaoY = personagem.y + personagem.alturaCanvas > planta.y;
+          return colisaoX && colisaoY;
+        } else {
+          // Planta alta: personagem deve passar por baixo
+          const colisaoY = personagem.y < planta.y + plantas.altura &&
+                           personagem.y + personagem.alturaCanvas > planta.y;
+          return colisaoX && colisaoY;
+        }
+      });
+    }
+  };
+
+  return plantas;
+}
+
+
+// COGUMELO
+function criaCogumelo() {
+  const cogumelo = {
+    lista: [],
+    largura: 40,
+    altura: 40,
+    frequencia: 200,  // aparece menos que plantas
+    velocidade: 2,
+    pontos: 0,  // contador de cogumelos coletados
+
+    atualiza() {
+      if (frames % cogumelo.frequencia === 0) {
+        // Aparece no chão (mesma altura das plantas baixas)
+        let posY = canvas.height - globais.chao.alturaCanvas - cogumelo.altura;
+        cogumelo.lista.push({
+          x: canvas.width,
+          y: posY,
+        });
+      }
+
+      // Move e remove os cogumelos que saíram da tela
+      cogumelo.lista = cogumelo.lista.filter(c => {
+        c.x -= cogumelo.velocidade;
+        return c.x + cogumelo.largura > 0;
+      });
+    },
+
+    desenha() {
+      cogumelo.lista.forEach(c => {
+        ctx.drawImage(
+          spriteCogumelo,
+          198, 195,
+          1248, 1407,
+          c.x, c.y,
+          cogumelo.largura, cogumelo.altura
+        );
+      });
+    },
+
+    verificaColeta(personagem) {
+      cogumelo.lista = cogumelo.lista.filter(c => {
+        const colisaoX = personagem.x < c.x + cogumelo.largura &&
+                         personagem.x + personagem.larguraCanvas > c.x;
+        const colisaoY = personagem.y < c.y + cogumelo.altura &&
+                         personagem.y + personagem.alturaCanvas > c.y;
+
+        if (colisaoX && colisaoY) {
+          cogumelo.pontos++;
+          return false; // remove cogumelo coletado
+        }
+        return true;
+      });
+    }
+  };
+
+  return cogumelo;
+}
+
 
 
 // Teclado
@@ -205,7 +372,7 @@ document.addEventListener('keydown', function(evento) {
   if (tecla == 'ArrowLeft') esquerdaPressionada = true;
 
   if ((tecla == ' ' || tecla == 'ArrowUp') && pulos < 2) {
-    velocidadeY = -15;
+    velocidadeY = -12;
     pulos++;
     noChao = false;
   }
@@ -235,24 +402,85 @@ telas.jogo = {
     globais.planoDeFundo = criaFundo();
     globais.chao = criaChao();
     globais.personagem = criapersonagem();
+    globais.plantas = criaPlantas();
+    globais.cogumelo = criaCogumelo(); 
   },
   desenha(){
     globais.planoDeFundo.desenha();
     globais.chao.desenha();
     globais.personagem.desenha();
+    globais.plantas.desenha();
+    globais.cogumelo.desenha();
+
+    // Mostrar placar de cogumelos coletados
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Cogumelos coletados: ${globais.cogumelo.pontos}`, 10, 30);
   },
+
   atualiza(){
     globais.planoDeFundo.atualiza();
     globais.chao.atualiza();
     globais.personagem.mover();
     globais.personagem.atualiza();
+    globais.plantas.atualiza();
+    globais.cogumelo.atualiza();  
+    globais.cogumelo.verificaColeta(globais.personagem); 
+
+    // Verifica colisão com plantas
+    if (globais.plantas.temColisaoCom(globais.personagem)) {
+      mudaDeTela(telas.gameOver);
+    }
   },
+  
 };
+
+telas.gameOver = {
+  desenha() {
+    // Preencher fundo preto sem transparência
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Texto "Game Over"
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 20);
+
+    // Texto para reiniciar o jogo
+    ctx.font = '20px Arial';
+    ctx.fillText('Pressione ENTER para reiniciar', canvas.width / 2, canvas.height / 2 + 30);
+
+    // Mostrar placar de cogumelos coletados na última partida
+    ctx.fillText(
+    `Cogumelos coletados: ${globais.cogumelo ? globais.cogumelo.pontos : 0}`,
+    canvas.width / 2,
+    canvas.height / 2 + 70
+    );
+  },
+
+  atualiza() {},
+
+  inicializa() {
+    
+    function reiniciaListener(event) {
+      if (event.key == 'Enter') {
+        mudaDeTela(telas.jogo);
+        document.removeEventListener('keydown', reiniciaListener);
+      }
+    }
+    document.addEventListener('keydown', reiniciaListener);
+  }
+};
+
 
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   telaAtiva.desenha();
   telaAtiva.atualiza();
+
+  frames = frames + 1;
   requestAnimationFrame(loop);
 }
 
