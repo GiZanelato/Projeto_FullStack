@@ -417,6 +417,11 @@ document.addEventListener('keyup', function(evento) {
   }
 });
 
+function InicioJogo() {
+  mudaDeTela(telas.jogo);
+}
+
+
 // Telas
 const globais = {};
 let telaAtiva = {};
@@ -429,6 +434,29 @@ function mudaDeTela(novaTela){
 }
 
 const telas = {};
+
+telas.inicio = {
+  inicializa(){
+    globais.planoDeFundo = criaFundo();
+    globais.chao = criaChao();
+  },
+  desenha(){
+    globais.planoDeFundo.desenha();
+    globais.chao.desenha();
+
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Clique no botão para iniciar o jogo!', canvas.width / 2, canvas.height / 2);
+  },
+
+  atualiza(){
+    globais.planoDeFundo.atualiza();
+    globais.chao.atualiza();
+    
+  },
+};
+
 
 telas.jogo = {
   inicializa(){
@@ -491,7 +519,7 @@ telas.jogo = {
 telas.gameOver = {
   desenha() {
     // Preencher fundo preto sem transparência
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = '#2c3e50';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Texto "Game Over"
@@ -536,5 +564,5 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-mudaDeTela(telas.jogo);
+mudaDeTela(telas.inicio);
 loop();
