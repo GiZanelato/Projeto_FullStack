@@ -174,7 +174,6 @@ function criapersonagem(){
     { spritex: 63, spritey: 0, }, 
     { spritex: 928, spritey: 0, }, 
     { spritex: 1712, spritey: 0, }, 
-    { spritex: 2496, spritey: 0, }, 
     { spritex: 3272, spritey: 0, }, 
     { spritex: 4160, spritey: 0, }, 
   ],
