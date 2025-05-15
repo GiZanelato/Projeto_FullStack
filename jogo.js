@@ -239,29 +239,31 @@ function criaPlantas() {
 
     atualiza() {
       if (frames % plantas.frequencia === 0) {
-        // Decide aleatoriamente se a planta será baixa ou alta
         const tipo = Math.random() < 0.5 ? 'baixo' : 'alto';
+        let posY = tipo === 'baixo'
+          ? canvas.height - globais.chao.alturaCanvas - plantas.altura
+          : Math.max(0, globais.personagem.y - plantas.altura - 10);
 
-        let posY;
-
-        if (tipo === 'baixo') {
-          // Próximo do chão - planta que o personagem pode pular por cima
-          posY = canvas.height - globais.chao.alturaCanvas - plantas.altura;
-        } else {
-          // Altas - planta que o personagem tem que passar por baixo
-          // Coloca acima do personagem (exemplo: 100 pixels acima dele)
-          posY = globais.personagem.y - plantas.altura - 10;
-          if (posY < 0) posY = 0;  // limite no topo do canvas
-        }
-
-        plantas.lista.push({
+        const novaPlanta = {
           x: canvas.width,
           y: posY,
           tipo: tipo,
+        };
+
+        // Verifica sobreposição com cogumelo
+        const colisaoComCogumelo = globais.cogumelo.lista.some(c => {
+          return novaPlanta.x < c.x + globais.cogumelo.largura &&
+                novaPlanta.x + plantas.largura > c.x &&
+                novaPlanta.y < c.y + globais.cogumelo.altura &&
+                novaPlanta.y + plantas.altura > c.y;
         });
+
+        if (!colisaoComCogumelo) {
+          plantas.lista.push(novaPlanta);
+        }
       }
 
-      // Move as plantas para esquerda e remove as que saíram da tela
+      // Move as plantas
       plantas.lista = plantas.lista.filter(planta => {
         planta.x -= plantas.velocidade;
         return planta.x + plantas.largura > 0;
@@ -315,20 +317,33 @@ function criaCogumelo() {
 
     atualiza() {
       if (frames % cogumelo.frequencia === 0) {
-        // Aparece no chão (mesma altura das plantas baixas)
-        let posY = canvas.height - globais.chao.alturaCanvas - cogumelo.altura;
-        cogumelo.lista.push({
+        const posY = canvas.height - globais.chao.alturaCanvas - cogumelo.altura;
+
+        const novoCogumelo = {
           x: canvas.width,
           y: posY,
+        };
+
+        // Verifica sobreposição com plantas
+        const colisaoComPlanta = globais.plantas.lista.some(p => {
+          return novoCogumelo.x < p.x + globais.plantas.largura &&
+                novoCogumelo.x + cogumelo.largura > p.x &&
+                novoCogumelo.y < p.y + globais.plantas.altura &&
+                novoCogumelo.y + cogumelo.altura > p.y;
         });
+
+        if (!colisaoComPlanta) {
+          cogumelo.lista.push(novoCogumelo);
+        }
       }
 
-      // Move e remove os cogumelos que saíram da tela
+      // Move e remove
       cogumelo.lista = cogumelo.lista.filter(c => {
         c.x -= cogumelo.velocidade;
         return c.x + cogumelo.largura > 0;
       });
     },
+
 
     desenha() {
       cogumelo.lista.forEach(c => {
@@ -341,27 +356,38 @@ function criaCogumelo() {
         );
       });
     },
-
-    verificaColeta(personagem) {
+    verificaColeta(personagem, atacando) {
       cogumelo.lista = cogumelo.lista.filter(c => {
         const colisaoX = personagem.x < c.x + cogumelo.largura &&
-                         personagem.x + personagem.larguraCanvas > c.x;
+                        personagem.x + personagem.larguraCanvas > c.x;
         const colisaoY = personagem.y < c.y + cogumelo.altura &&
-                         personagem.y + personagem.alturaCanvas > c.y;
+                        personagem.y + personagem.alturaCanvas > c.y;
 
-        if (colisaoX && colisaoY) {
+        if (colisaoX && colisaoY && atacando) {
           cogumelo.pontos++;
           return false; // remove cogumelo coletado
         }
         return true;
       });
     }
+
   };
 
   return cogumelo;
 }
 
+function plantaSobreCogumelo(planta, cogumelo) {
+  const overlapX = planta.x < cogumelo.x + globais.cogumelo.largura &&
+                   planta.x + globais.plantas.largura > cogumelo.x;
 
+  const overlapY = planta.y < cogumelo.y + globais.cogumelo.altura &&
+                   planta.y + globais.plantas.altura > cogumelo.y;
+
+  return overlapX && overlapY;
+}
+
+
+let atacando = false;
 
 // Teclado
 document.addEventListener('keydown', function(evento) {
@@ -375,12 +401,20 @@ document.addEventListener('keydown', function(evento) {
     pulos++;
     noChao = false;
   }
+
+  if (tecla.toLowerCase() === 'z') {
+    atacando = true;
+  }
 });
 
 document.addEventListener('keyup', function(evento) {
   const tecla = evento.key;
   if (tecla == 'ArrowRight') direitaPressionada = false;
   if (tecla == 'ArrowLeft') esquerdaPressionada = false;
+
+  if (tecla.toLowerCase() === 'z') {
+    atacando = false;
+  }
 });
 
 // Telas
@@ -425,12 +459,31 @@ telas.jogo = {
     globais.personagem.atualiza();
     globais.plantas.atualiza();
     globais.cogumelo.atualiza();  
-    globais.cogumelo.verificaColeta(globais.personagem); 
-
+    globais.cogumelo.verificaColeta(globais.personagem, atacando);  
     // Verifica colisão com plantas
     if (globais.plantas.temColisaoCom(globais.personagem)) {
       mudaDeTela(telas.gameOver);
     }
+
+    if (atacando) {
+      // Percorre todas as plantas e cogumelos para achar sobreposição
+      globais.plantas.lista = globais.plantas.lista.filter(planta => {
+        // Se a planta está sobre algum cogumelo, remove a planta e remove o cogumelo, soma ponto
+        let plantaEstaSobreCogumelo = false;
+
+        globais.cogumelo.lista = globais.cogumelo.lista.filter(cogumelo => {
+          if (plantaSobreCogumelo(planta, cogumelo)) {
+            plantaEstaSobreCogumelo = true;
+            globais.cogumelo.pontos++;  // soma ponto no cogumelo coletado
+            return false; // remove cogumelo
+          }
+          return true; // mantém cogumelo
+        });
+
+        return !plantaEstaSobreCogumelo; // remove planta se estava sobre cogumelo
+      });
+    }
+
   },
   
 };
