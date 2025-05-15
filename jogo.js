@@ -11,28 +11,49 @@ const spritefundo = new Image();
 spritefundo.src = 'imagens/fundo2.png';
 
 // plano de fundo
-const planoDeFundo = {
-  spritex : 6,
-  spritey : 11,
-  largura : 5230,
-  altura : 3471,
-  x : 0,
-  y : canvas.height - 400,
-  larguraCanvas : 800,
-  alturaCanvas : 400,
-  desenha(){
-    ctx.drawImage(
-      spritefundo,
-      planoDeFundo.spritex , planoDeFundo.spritey,
-      planoDeFundo.largura, planoDeFundo.altura,
-      planoDeFundo.x, planoDeFundo.y,
-      planoDeFundo.larguraCanvas, planoDeFundo.alturaCanvas
-    );
-  }
-};
+function criaFundo(){
+  const planoDeFundo = {
+    spritex : 6,
+    spritey : 11,
+    largura : 5230,
+    altura : 3471,
+    x : 0,
+    y : canvas.height - 400,
+    larguraCanvas : 800,
+    alturaCanvas : 400,
+    atualiza(){
+      const movimentoFundo = 0.5; // mais lento que o chão para dar sensação de profundidade   
+      planoDeFundo.x = planoDeFundo.x -  movimentoFundo;
 
-// Chao
-const chao = {
+      if (planoDeFundo.x <= -planoDeFundo.larguraCanvas) {
+        planoDeFundo.x = 0;
+      }
+    },
+
+    desenha(){
+      ctx.drawImage(
+        spritefundo,
+        planoDeFundo.spritex , planoDeFundo.spritey,
+        planoDeFundo.largura, planoDeFundo.altura,
+        planoDeFundo.x, planoDeFundo.y,
+        planoDeFundo.larguraCanvas, planoDeFundo.alturaCanvas
+      );
+
+      ctx.drawImage(
+        spritefundo,
+        planoDeFundo.spritex , planoDeFundo.spritey,
+        planoDeFundo.largura, planoDeFundo.altura,
+        (planoDeFundo.x + planoDeFundo.larguraCanvas), planoDeFundo.y,
+        planoDeFundo.larguraCanvas, planoDeFundo.alturaCanvas
+      );
+    }
+  };
+  return planoDeFundo;
+}
+
+//chao
+function criaChao(){
+  const chao = {
   spritex : 1896,      //posição x no sprite  (arquivo png)
   spritey : 424,       //posição y no sprite  (arquivo png)
   largura : 3760,      //largura da imagem no sprite (arquivo png)
@@ -42,6 +63,16 @@ const chao = {
   larguraCanvas : 800,         // largura da imagem no canva
   alturaCanvas : 65,             // altura da imagem no canva
 
+  atualiza() {
+    const movimentoChao = 1;
+    chao.x = chao.x - movimentoChao;
+
+    if (chao.x <= -chao.larguraCanvas) {
+      chao.x = 0;
+    }
+  },
+
+
   desenha(){                         // função que desenha a imagem no canva
     ctx.drawImage(
       spritechao,
@@ -50,8 +81,20 @@ const chao = {
       chao.x, chao.y,
       chao.larguraCanvas, chao.alturaCanvas
     );
-  }
+
+      ctx.drawImage(
+        spritechao,
+        chao.spritex , chao.spritey,
+        chao.largura, chao.altura,
+        (chao.x + chao.larguraCanvas), chao.y,
+        chao.larguraCanvas, chao.alturaCanvas
+    );
+  },
 };
+
+return chao;
+}
+
 
 // Controle de movimento
 let direitaPressionada = false;
@@ -74,13 +117,13 @@ function fazColisao(personagem, chao){
   }
 }
 
-
-// Personagem
-const personagem = {
-  spritex : 0,
+// PERSONAGEM
+function criapersonagem(){
+  const personagem = {
+  spritex : 63,
   spritey : 0,
-  largura : 944,
-  altura : 1552,
+  largura : 880,
+  altura : 1550,
   x : 10,
   y : 245,
   larguraCanvas : 60,
@@ -94,7 +137,7 @@ const personagem = {
     personagem.y += velocidadeY;
 
      // Verifica colisão com o chão
-    fazColisao(personagem, chao);
+    fazColisao(personagem, globais.chao);
 
   },
 
@@ -113,16 +156,46 @@ const personagem = {
     }
   },
 
+  movimentos: [             // corrida
+    { spritex: 63, spritey: 0, }, 
+    { spritex: 928, spritey: 0, }, 
+    { spritex: 1712, spritey: 0, }, 
+    { spritex: 2496, spritey: 0, }, 
+    { spritex: 3272, spritey: 0, }, 
+    { spritex: 4160, spritey: 0, }, 
+  ],
+
+  frameAtual: 0,
+  atualizaOFrameAtual() {     
+    const intervaloDeFrames = 10;
+    const passouOIntervalo = frames % intervaloDeFrames === 0;
+
+    if(passouOIntervalo) {
+      const baseDoIncremento = 1;
+      const incremento = baseDoIncremento + personagem.frameAtual;
+      const baseRepeticao = passouOIntervalo.movimentos.length;
+      personagem.frameAtual = incremento % baseRepeticao
+    }
+  },
+
   desenha(){
+    personagem.atualizaOFrameAtual();
+    const { spritex, spritey } = personagem.movimentos[personagem.frameAtual];
+
     ctx.drawImage(
       spritePersonagem,
-      personagem.spritex , personagem.spritey,
+      spritex , spritey,
       personagem.largura, personagem.altura,
       personagem.x, personagem.y,
       personagem.larguraCanvas, personagem.alturaCanvas
     );
   }
 };
+
+ return personagem;
+
+}
+
 
 // Teclado
 document.addEventListener('keydown', function(evento) {
@@ -145,22 +218,34 @@ document.addEventListener('keyup', function(evento) {
 });
 
 // Telas
+const globais = {};
 let telaAtiva = {};
 function mudaDeTela(novaTela){
   telaAtiva =  novaTela;
+
+  if(telaAtiva.inicializa){
+    telaAtiva.inicializa();
+  }
 }
 
 const telas = {};
 
 telas.jogo = {
+  inicializa(){
+    globais.planoDeFundo = criaFundo();
+    globais.chao = criaChao();
+    globais.personagem = criapersonagem();
+  },
   desenha(){
-    planoDeFundo.desenha();
-    chao.desenha();
-    personagem.desenha();
+    globais.planoDeFundo.desenha();
+    globais.chao.desenha();
+    globais.personagem.desenha();
   },
   atualiza(){
-    personagem.mover();
-    personagem.atualiza();
+    globais.planoDeFundo.atualiza();
+    globais.chao.atualiza();
+    globais.personagem.mover();
+    globais.personagem.atualiza();
   },
 };
 
