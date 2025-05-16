@@ -1,44 +1,47 @@
-const canvas = document.getElementById("jogo-canvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById("jogo-canvas");     // Obtém o elemento canvas do HTML com o id "jogo-canvas"
+const ctx = canvas.getContext("2d");                       // Obtém o contexto 2D do canvas, que permite desenhar no canvas
+  
+let frames = 0;                                           // Inicializa um contador de frames
+const spritePersonagem = new Image();                     // Cria uma nova imagem para o sprite do personagem
+spritePersonagem.src = 'imagens/personagem.png';          // Define a fonte da imagem do sprite do personagem
 
-let frames = 0;
-const spritePersonagem = new Image();
-spritePersonagem.src = 'imagens/personagem.png';
-
-const spritechao = new Image();
+const spritechao = new Image();                           // Cria uma nova imagem para o sprite do chão
 spritechao.src = 'imagens/sprite.png';
 
-const spritefundo = new Image();
+const spritefundo = new Image();                          // Cria uma nova imagem para o sprite do fundo
 spritefundo.src = 'imagens/fundo2.png';
 
-const spritePlanta = new Image();
+const spritePlanta = new Image();                       // Cria uma nova imagem para o sprite da planta
 spritePlanta.src = 'imagens/planta.png';
 
-const spriteCogumelo = new Image();
+const spriteCogumelo = new Image();                     // Cria uma nova imagem para o sprite do cogumelo
 spriteCogumelo.src = 'imagens/cogumelo.png'; 
 
 
-// plano de fundo
-function criaFundo(){
-  const planoDeFundo = {
-    spritex : 6,
-    spritey : 11,
-    largura : 5230,
-    altura : 3471,
-    x : 0,
-    y : canvas.height - 400,
-    larguraCanvas : 800,
-    alturaCanvas : 400,
-    atualiza(){
-      const movimentoFundo = 0.5; // mais lento que o chão para dar sensação de profundidade   
-      planoDeFundo.x = planoDeFundo.x -  movimentoFundo;
 
+// plano de fundo
+// Função que cria o plano de fundo do jogo
+function criaFundo(){
+  const planoDeFundo = {                          
+    spritex : 6,                                       // Posição x no sprite (arquivo PNG)
+    spritey : 11,                                      // Posição y no sprite (arquivo PNG)
+    largura : 5230,                                     // Largura da imagem no sprite (arquivo PNG)
+    altura : 3471,                                    // Altura da imagem no sprite (arquivo PNG)
+    x : 0,                                           // Posição x no canvas
+    y : canvas.height - 400,                           // Posição y no canvas, ajustada para a altura do fundo
+    larguraCanvas : 800,                             // Largura da imagem no canvas
+    alturaCanvas : 400,                               // Altura da imagem no canvas
+    atualiza(){                                         // atualiza a posição do fundo
+      const movimentoFundo = 0.5;                           // Velocidade de movimento do fundo, mais lento que o chão para dar sensação de profundidade   
+      planoDeFundo.x = planoDeFundo.x -  movimentoFundo;         // Atualiza a posição x do fundo
+
+      // Se o fundo sair da tela, reinicia a posição x
       if (planoDeFundo.x <= -planoDeFundo.larguraCanvas) {
         planoDeFundo.x = 0;
       }
     },
 
-    desenha(){
+    desenha(){                                           //desenha o fundo no canvas
       ctx.drawImage(
         spritefundo,
         planoDeFundo.spritex , planoDeFundo.spritey,
@@ -136,7 +139,7 @@ function criapersonagem(){
   y : 245,
   larguraCanvas : 60,
   alturaCanvas : 95,
-  velocidade: 5,
+  velocidade: 3,
 
   atualiza() {
     // Aplica gravidade
