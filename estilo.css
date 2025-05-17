@@ -1,9 +1,9 @@
 body{
   width: 100%;   /* para ocupar toda a pagina, 100% da pagina*/
   height: 100vh;    /* para ocupar toda a pagina, 100% do view height*/
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url('./imagens/fundo.png');   /* Aplica um gradiente que deixa a imagem mais escura e translucida --> chatGPT*/
-  background-size: cover;     /* Faz a imagem cobrir todo o fundo --> ChatGPT*/
-  background-position: center;  /* centraliza a imagem  --> ChatGPT*/
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url('./imagens/fundo.png');   /* Aplica um gradiente que deixa a imagem mais escura e translucida*/
+  background-size: cover;     /* Faz a imagem cobrir todo o fundo*/
+  background-position: center;  /* centraliza a imagem*/
   z-index: -1;
   padding: 0;
   margin: 0;
@@ -34,7 +34,7 @@ body{
 .links_navbar{
   display: flex;
   align-items: center;
-  list-style: none;  /*tira os pontos que ficam na frente do item da lista --> ChatGPT*/
+  list-style: none;  /*tira os pontos que ficam na frente do item da lista */
 }
 
 .links{
@@ -51,7 +51,7 @@ body{
 }
 
 .texto {
-  background-color: rgba(255, 255, 255, 0.8); /* Caixa branca com transparência --> chatGPT*/
+  background-color: rgba(255, 255, 255, 0.8); /* Caixa branca com transparência*/
   padding: 30px;
   border-radius: 15px;
   text-align: center;
@@ -88,7 +88,7 @@ body{
 
 
 .creditos {
-  background-color: rgba(255, 255, 255, 0.8); /* Caixa branca com transparência -->ChatGPT*/
+  background-color: rgba(255, 255, 255, 0.8); /* Caixa branca com transparência*/
   padding: 30px;
   border-radius: 15px;
   margin-top: 100px;
@@ -139,7 +139,7 @@ body{
   border: 2px solid red;
 }
 
-/*rever a partir daqui , mudar o codigo para mais simples */
+
 .container {
   margin-top: 10px;
   background-color: rgba(255, 255, 255, 0.9);
