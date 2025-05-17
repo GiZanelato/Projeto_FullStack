@@ -139,36 +139,38 @@ body{
   border: 2px solid red;
 }
 
-
 .container {
-  margin-top: 10px;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  font-family: inherit;
+  margin-top: 10px; 
+  background-color: rgba(255, 255, 255, 0.9); /* Cor de fundo branca com 90% de opacidade (0.9) */
+  padding: 30px; /* Espaçamento interno de 30px em todos os lados (topo, direita, baixo, esquerda) */
+  border-radius: 20px; /* Arredonda os cantos do container com raio de 20px */
+  text-align: center; 
+  font-family: inherit; 
 }
 
 .container h1 {
-  font-size: 28px;
-  color: #222;
-  margin-bottom: 10px;
+  font-size: 28px; 
+  color: #222; 
+  margin-bottom: 10px; 
 }
+
 
 .container p, .container ul {
-  color: #333;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 10px 0;
+  color: #333; 
+  font-size: 16px; 
+  line-height: 1.5; /* Define o espaçamento entre linhas como 1,5 vezes o tamanho da fonte*/
+  margin: 10px 0; /* Aplica margem superior e inferior de 10px e nenhuma nas laterais */
 }
+
 
 .container ul {
-  list-style-type: none;
-  padding: 0;
+  list-style-type: none; /* Remove os marcadores padrão (bolinhas) da lista */
+  padding: 0; 
 }
 
+
 .container ul li {
-  margin: 5px 0;
+  margin: 5px 0; /* Aplica espaçamento vertical de 5px entre os itens da lista */
 }
 
 .botão {
