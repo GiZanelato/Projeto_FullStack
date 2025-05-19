@@ -627,7 +627,7 @@ let telaAtiva = {};
 
 // Função para mudar a tela ativa para uma nova tela recebida por parâmetro
 function mudaDeTela(novaTela){
-  telaAtiva =  novaTela;            // Define a nova tela como a ativa
+  telaAtiva =  novaTela;                        // Define a nova tela como a ativa
 
   // Se a nova tela tiver uma função de inicialização, executa ela
   if(telaAtiva.inicializa){
@@ -651,9 +651,9 @@ telas.inicio = {
     globais.chao.desenha();
 
     // Configura o estilo do texto a ser desenhado na tela
-    ctx.fillStyle = 'white';         // Cor do texto branco
-    ctx.font = '30px Arial';         // Fonte Arial, tamanho 30px
-    ctx.textAlign = 'center';        // Centraliza o texto no eixo X
+    ctx.fillStyle = 'white';                        // Cor do texto branco
+    ctx.font = '30px Arial';                        // Fonte Arial, tamanho 30px
+    ctx.textAlign = 'center';                       // Centraliza o texto no eixo X
 
     // Escreve o texto no centro da tela
     ctx.fillText('Clique no botão para iniciar o jogo!', canvas.width / 2, canvas.height / 2);
@@ -705,38 +705,17 @@ telas.jogo = {
 
     // Verifica colisão do personagem com plantas (obstáculos)
     if (globais.plantas.temColisaoCom(globais.personagem)) {
-      mudaDeTela(telas.gameOver);                                   // Se colidir, muda para tela de game over
+      mudaDeTela(telas.gameOver);                                      // Se colidir, muda para tela de game over
     }
-
-    // // Se o personagem está atacando, verifica se plantas estão sobre cogumelos
-    // if (atacando) {
-    //   // Filtra a lista de plantas para remover as que estão sobre cogumelos
-    //   globais.plantas.lista = globais.plantas.lista.filter(planta => {
-    //     let plantaEstaSobreCogumelo = false; // indica se a planta está sobre um cogumelo
-
-    //     // Filtra a lista de cogumelos para remover os que estão sob plantas atacadas
-    //     globais.cogumelo.lista = globais.cogumelo.lista.filter(cogumelo => {
-    //       // Função que verifica se planta está sobre cogumelo (colisão)
-    //       if (plantaSobreCogumelo(planta, cogumelo)) {
-    //         plantaEstaSobreCogumelo = true;  // Marca que a planta estava sobre cogumelo
-    //         globais.cogumelo.pontos++;        // Incrementa pontos ao remover o cogumelo
-    //         return false;                     // Remove o cogumelo da lista
-    //       }
-    //       return true;  // Mantém o cogumelo na lista caso não tenha colisão
-    //     });
-
-    //     return !plantaEstaSobreCogumelo; // Remove a planta se estava sobre cogumelo
-    //   });
-    // }
   },
 };
 
 // Tela de game over
 telas.gameOver = {
   desenha() {
-    // Preenche a tela toda com uma cor sólida (fundo preto azulado)
+    // Preenche a tela toda com uma cor sólida
     ctx.fillStyle = '#2c3e50';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);      // Desenha um retângulo preenchido que cobre toda a área do canvas. Começa no canto superior esquerdo (0,0) e vai até a largura e altura totais do canvas
 
     // Exibe o texto "Game Over" centralizado e em negrito, tamanho 48px
     ctx.fillStyle = 'white';
@@ -749,35 +728,32 @@ telas.gameOver = {
     ctx.fillText('Pressione ENTER para reiniciar', canvas.width / 2, canvas.height / 2 + 30);
 
     // Mostra a pontuação final de cogumelos coletados na última partida
-    ctx.fillText(
-      `Cogumelos coletados: ${globais.cogumelo ? globais.cogumelo.pontos : 0}`,
-      canvas.width / 2,
-      canvas.height / 2 + 70
-    );
+    // o valor de globais.cogumelo.pontos será convertido para texto e colocado no lugar do ${...}
+    ctx.fillText(`Cogumelos coletados: ${globais.cogumelo.pontos}`, canvas.width / 2, canvas.height / 2 + 70);
   },
 
-  atualiza() {},  // Tela de game over não atualiza nada por enquanto
+  atualiza() {},  // Tela de game over 
 
   inicializa() {
     // Função que escuta o pressionar da tecla ENTER para reiniciar o jogo
     function reiniciaListener(event) {
       if (event.key == 'Enter') {
-        mudaDeTela(telas.jogo);             // Volta para a tela do jogo
-        document.removeEventListener('keydown', reiniciaListener); // Remove o listener para evitar múltiplos
+        mudaDeTela(telas.jogo);                                               // Volta para a tela do jogo
+        document.removeEventListener('keydown', reiniciaListener);            // Remove o listener para evitar múltiplos reinícios
       }
     }
     document.addEventListener('keydown', reiniciaListener);
   }
 };
 
-// Loop principal do jogo, roda a cada frame (~60 vezes por segundo)
+// Loop principal do jogo, roda a cada frame
 function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);  // Limpa a tela para desenhar tudo novamente
-  telaAtiva.desenha();    // Desenha a tela atual (início, jogo, game over)
-  telaAtiva.atualiza();   // Atualiza a lógica da tela atual
+  ctx.clearRect(0, 0, canvas.width, canvas.height);                         // Limpa a tela para desenhar tudo novamente
+  telaAtiva.desenha();                                                      // Desenha a tela atual (início, jogo, game over)
+  telaAtiva.atualiza();                                                     // Atualiza a lógica da tela atual
 
-  frames = frames + 1;    // Incrementa o contador de frames (tempo do jogo)
-  requestAnimationFrame(loop); // Pede para o navegador rodar o loop na próxima atualização da tela (~16ms)
+  frames = frames + 1;                                                      // Incrementa o contador de frames (tempo do jogo)
+  requestAnimationFrame(loop);                                              // Pede para o navegador rodar o loop na próxima atualização da tela 
 }
 
 // Inicia o jogo definindo a tela inicial e chamando o loop
