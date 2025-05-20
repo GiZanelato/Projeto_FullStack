@@ -154,7 +154,7 @@ function criapersonagem(){
     y : 245,                          // Posição y no canvas onde o personagem será desenhado
     larguraCanvas : 60,               // Largura da imagem do personagem que será desenhada no canvas
     alturaCanvas : 95,                // Altura da imagem do personagem que será desenhada no canvas
-    velocidade: 3,                    // Velocidade de movimento do personagem
+    velocidade: 5,                    // Velocidade de movimento do personagem
 
     // atualiza a posição do personagem
     atualiza() {                      
@@ -219,7 +219,7 @@ function criapersonagem(){
     
     // atualiza o frame atual da animação
     atualizaOFrameAtual() {     
-      const intervaloDeFrames = 15;                                 // Define o intervalo de frames para a animação, controlando a velocidade da animação
+      const intervaloDeFrames = 10;                                 // Define o intervalo de frames para a animação, controlando a velocidade da animação
       const passouOIntervalo = frames % intervaloDeFrames == 0;     // Verifica se o número de frames passados é um múltiplo do intervalo definido (resto da divisão)
 
       // Se passou o intervalo, atualiza o frame atual
