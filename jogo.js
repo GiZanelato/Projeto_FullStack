@@ -622,6 +622,10 @@ function InicioJogo() {
 // Objeto para armazenar variáveis globais, compartilhadas entre as telas
 const globais = {};
 
+let tempoInicial = null;
+let tempoLimite = 50000; // 50 segundos em milissegundos
+
+
 // Variável que mantém a tela ativa (início, jogo, game over)
 let telaAtiva = {};
 
@@ -675,6 +679,8 @@ telas.jogo = {
     globais.personagem = criapersonagem();
     globais.plantas = criaPlantas();
     globais.cogumelo = criaCogumelo(); 
+    tempoInicial = Date.now(); // Marca o tempo que o jogo começou
+
   },
   desenha(){
     // Desenha todos os elementos do jogo na ordem correta
@@ -689,6 +695,11 @@ telas.jogo = {
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
     ctx.fillText(`Cogumelos coletados: ${globais.cogumelo.pontos}`, 10, 30);      // Desenha o texto na tela com o número de cogumelos coletados. Na Posição (10, 30): 10px da borda esquerda, 30px do topo
+  
+    // Exibe o tempo restante
+    const tempoDecorrido = Date.now() - tempoInicial;
+    const tempoRestante = Math.max(0, Math.ceil((tempoLimite - tempoDecorrido) / 1000));
+    ctx.fillText(`Tempo restante: ${tempoRestante}s`, 10, 60);
   },
 
   atualiza(){
@@ -707,6 +718,18 @@ telas.jogo = {
     if (globais.plantas.temColisaoCom(globais.personagem)) {
       mudaDeTela(telas.gameOver);                                      // Se colidir, muda para tela de game over
     }
+    
+    // Verifica se coletou 15 cogumelos
+    if (globais.cogumelo.pontos >= 10) {
+      mudaDeTela(telas.ganhou); // Vitória por coleta
+    }
+
+    // Verifica se o tempo acabou (passaram 50 segundos)
+    const tempoAtual = Date.now();
+    if (tempoAtual - tempoInicial >= tempoLimite) {
+      mudaDeTela(telas.gameOver); // Tempo esgotado
+    }
+    
   },
 };
 
@@ -745,6 +768,44 @@ telas.gameOver = {
     document.addEventListener('keydown', reiniciaListener);
   }
 };
+
+
+// Tela de vitoria
+telas.ganhou = {
+  desenha() {
+    // Preenche a tela toda com uma cor sólida
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);      // Desenha um retângulo preenchido que cobre toda a área do canvas. Começa no canto superior esquerdo (0,0) e vai até a largura e altura totais do canvas
+
+    // Exibe o texto "Game Over" centralizado e em negrito, tamanho 48px
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Ganhou!!!', canvas.width / 2, canvas.height / 2 - 20);
+
+    // Texto menor instruindo o jogador a pressionar ENTER para reiniciar
+    ctx.font = '20px Arial';
+    ctx.fillText('Pressione ENTER para reiniciar', canvas.width / 2, canvas.height / 2 + 30);
+
+    // Mostra a pontuação final de cogumelos coletados na última partida
+    // o valor de globais.cogumelo.pontos será convertido para texto e colocado no lugar do ${...}
+    ctx.fillText(`Cogumelos coletados: ${globais.cogumelo.pontos}`, canvas.width / 2, canvas.height / 2 + 70);
+  },
+
+  atualiza() {},  // Tela de game over 
+
+  inicializa() {
+    // Função que escuta o pressionar da tecla ENTER para reiniciar o jogo
+    function reiniciaListener(event) {
+      if (event.key == 'Enter') {
+        mudaDeTela(telas.jogo);                                               // Volta para a tela do jogo
+        document.removeEventListener('keydown', reiniciaListener);            // Remove o listener para evitar múltiplos reinícios
+      }
+    }
+    document.addEventListener('keydown', reiniciaListener);
+  }
+};
+
 
 // Loop principal do jogo, roda a cada frame
 function loop() {
