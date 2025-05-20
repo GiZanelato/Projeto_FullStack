@@ -711,8 +711,16 @@ telas.jogo = {
     globais.plantas.atualiza();                                       // Atualiza as plantas 
     globais.cogumelo.atualiza();                                      // Atualiza os cogumelos
 
+    let pontosAntes = globais.cogumelo.pontos;
+
     // Verifica se o personagem coletou algum cogumelo
     globais.cogumelo.verificaColeta(globais.personagem, atacando);
+
+    let pontosDepois = globais.cogumelo.pontos;
+    if (pontosDepois > pontosAntes) {
+      tempoLimite += 3000; // Adiciona 3 segundos ao tempo limite
+    }
+
 
     // Verifica colisão do personagem com plantas (obstáculos)
     if (globais.plantas.temColisaoCom(globais.personagem)) {
@@ -777,7 +785,7 @@ telas.ganhou = {
     ctx.fillStyle = '#2c3e50';
     ctx.fillRect(0, 0, canvas.width, canvas.height);      // Desenha um retângulo preenchido que cobre toda a área do canvas. Começa no canto superior esquerdo (0,0) e vai até a largura e altura totais do canvas
 
-    // Exibe o texto "Game Over" centralizado e em negrito, tamanho 48px
+    // Exibe o texto centralizado e em negrito, tamanho 48px
     ctx.fillStyle = 'white';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
